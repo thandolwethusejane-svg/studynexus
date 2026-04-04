@@ -6,35 +6,444 @@
   <title>Study Nexus</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0f1e; color: #fff; font-family: sans-serif; }
+    body { background: #0a0f1e; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+
+    /* SPLASH */
+    #splash {
+      position: fixed; inset: 0; z-index: 1000;
+      background: #0a0f1e;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity 1s ease;
+    }
+    #splash.hide { opacity: 0; pointer-events: none; }
+    #splash h1 {
+      font-size: 13px; letter-spacing: 0.3em;
+      color: #94a3b8; text-transform: uppercase;
+      margin-bottom: 20px; opacity: 0;
+      animation: fadeUp 1s ease 0.5s forwards;
+    }
+    #splash h2 {
+      font-size: 38px; font-weight: 700;
+      color: #fff; text-align: center;
+      opacity: 0; animation: fadeUp 1s ease 1s forwards;
+    }
+    #splash .line {
+      width: 60px; height: 2px;
+      background: #2563eb; margin: 20px auto;
+      opacity: 0; animation: fadeUp 1s ease 1.5s forwards;
+    }
+    #splash p {
+      font-size: 14px; color: #64748b;
+      opacity: 0; animation: fadeUp 1s ease 2s forwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* GRADE MODAL OVERLAY */
+    #gradeOverlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 500;
+      backdrop-filter: blur(12px);
+      background: rgba(10,15,30,0.5);
+      align-items: center; justify-content: center;
+    }
+    #gradeOverlay.show { display: flex; }
+    .grade-modal {
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 32px 28px;
+      width: 90%; max-width: 340px; text-align: center;
+    }
+    .grade-modal .eyebrow {
+      font-size: 11px; letter-spacing: 0.2em;
+      color: #64748b; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .grade-modal h2 {
+      font-size: 22px; font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .grade-modal p {
+      font-size: 13px; color: #64748b; margin-bottom: 24px;
+    }
+    .grade-btns {
+      display: grid; grid-template-columns: repeat(5,1fr);
+      gap: 8px; margin-bottom: 20px;
+    }
+    .grade-btns button {
+      padding: 12px 4px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; color: #64748b;
+      font-size: 15px; cursor: pointer; transition: all 0.2s;
+    }
+    .grade-btns button.active {
+      background: rgba(37,99,235,0.15);
+      border-color: rgba(37,99,235,0.4);
+      color: #fff;
+    }
+    .start-btn {
+      width: 100%; padding: 14px;
+      background: #2563eb; border: none;
+      border-radius: 12px; color: #fff;
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .start-btn:hover { opacity: 0.9; }
 
     /* TOP BAR */
     .topbar {
       position: sticky; top: 0; z-index: 100;
       display: flex; justify-content: space-between; align-items: center;
       padding: 14px 20px;
-      background: rgba(10,15,30,0.95);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(10,15,30,0.9);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    .topbar h1 { font-size: 18px; font-weight: 600; color: #fff; }
+    .topbar h1 {
+      font-size: 16px; font-weight: 600;
+      letter-spacing: 0.05em; cursor: pointer;
+      color: #fff;
+    }
     .grade-switcher {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      color: #fff; padding: 6px 14px;
-      border-radius: 20px; font-size: 14px; cursor: pointer;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8; padding: 6px 14px;
+      border-radius: 20px; font-size: 13px; cursor: pointer;
     }
 
-    /* LANDING */
-    #landing {
-      min-height: 100vh; display: flex;
-      flex-direction: column; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
+    /* SUBJECT SECTIONS */
+    .subject-section { position: relative; }
+    .subject-hero {
+      position: relative; height: 520px;
+      display: flex; align-items: flex-end;
+      justify-content: flex-start;
+      overflow: hidden;
+      padding: 32px 24px;
     }
-    #landing .bg {
+    .subject-hero img {
+      position: absolute; inset: -20%;
+      width: 100%; height: 140%;
+      object-fit: cover; will-change: transform;
+    }
+    .subject-hero .overlay {
       position: absolute; inset: 0;
-      background: url('https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&q=80') center/cover no-repeat;
-      filter: brightness(0.35);
+      background: linear-gradient(to top, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.2) 60%, transparent 100%);
     }
+    .subject-hero .hero-text {
+      position: relative; z-index: 2;
+    }
+    .subject-hero .hero-text span {
+      font-size: 11px; letter-spacing: 0.25em;
+      color: #64748b; text-transform: uppercase; display: block;
+      margin-bottom: 6px;
+    }
+    .subject-hero .hero-text h2 {
+      font-size: 32px; font-weight: 700; color: #fff;
+    }
+
+    /* TOPICS */
+    .topics { padding: 0 20px 40px; }
+    .term {
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .term-header {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 16px 0;
+      cursor: pointer;
+    }
+    .term-header .term-label {
+      font-size: 13px; color: #475569;
+      letter-spacing: 0.05em;
+    }
+    .term-header .term-label.current { color: #cbd5e1; }
+    .term-header .icon { font-size: 16px; color: #334155; }
+    .term-body {
+      display: none; padding-bottom: 16px;
+      flex-wrap: wrap; gap: 6px;
+    }
+    .term-body.open { display: flex; }
+    .pill {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: #94a3b8; border-radius: 20px;
+      padding: 4px 12px; font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <h1>Welcome to</h1>
+  <h2>Study Nexus</h2>
+  <div class="line"></div>
+  <p>Your personalised CAPS study companion</p>
+</div>
+
+<!-- GRADE MODAL -->
+<div id="gradeOverlay">
+  <div class="grade-modal">
+    <p class="eyebrow">Before you begin</p>
+    <h2>What grade are you in?</h2>
+    <p>This helps us show you the right content</p>
+    <div class="grade-btns">
+      <button onclick="selectGrade(8,this)">8</button>
+      <button onclick="selectGrade(9,this)">9</button>
+      <button onclick="selectGrade(10,this)">10</button>
+      <button onclick="selectGrade(11,this)">11</button>
+      <button onclick="selectGrade(12,this)">12</button>
+    </div>
+    <button class="start-btn" onclick="enterApp()">Let's go</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <h1 onclick="location.reload()">Study Nexus</h1>
+    <button class="grade-switcher" onclick="showGradeModal()" id="gradeLabel">Grade —</button>
+  </div>
+
+  <!-- MATHEMATICS -->
+  <div class="subject-section">
+    <div class="subject-hero">
+      <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1600&q=80" alt="Mathematics" />
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <span>Subject</span>
+        <h2>Mathematics</h2>
+      </div>
+    </div>
+    <div class="topics">
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 1</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Whole numbers</span><span class="pill">Integers</span><span class="pill">Exponents</span><span class="pill">Numeric & geometric patterns</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
+        </div>
+        <div class="term-body open">
+          <span class="pill">Functions & relationships</span><span class="pill">Algebraic expressions</span><span class="pill">Algebraic equations</span><span class="pill">Graphs</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 3</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Geometry of 2D shapes</span><span class="pill">Geometry of straight lines</span><span class="pill">Pythagoras</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 4</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Area & perimeter</span><span class="pill">Surface area & volume</span><span class="pill">Data handling</span><span class="pill">Probability</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AFRIKAANS -->
+  <div class="subject-section">
+    <div class="subject-hero">
+      <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80" alt="Afrikaans" />
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <span>Subject</span>
+        <h2>Afrikaans EAT</h2>
+      </div>
+    </div>
+    <div class="topics">
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 1</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Leesbegrip</span><span class="pill">Kort stories</span><span class="pill">Taalstrukture & woordeskat</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
+        </div>
+        <div class="term-body open">
+          <span class="pill">Formele brief</span><span class="pill">Advertensie</span><span class="pill">Begrip & visuele tekste</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 3</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Drama teks</span><span class="pill">Opstel skryf</span><span class="pill">Visuele geletterdheid</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 4</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Gedigte</span><span class="pill">Hersiening</span><span class="pill">Eksamenvoorbereiding</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENGLISH -->
+  <div class="subject-section">
+    <div class="subject-hero">
+      <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&q=80" alt="English" />
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <span>Subject</span>
+        <h2>English HL</h2>
+      </div>
+    </div>
+    <div class="topics">
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 1</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Short stories</span><span class="pill">Transactional writing</span><span class="pill">Language structures</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
+        </div>
+        <div class="term-body open">
+          <span class="pill">Novel study</span><span class="pill">Formal letter</span><span class="pill">Comprehension</span><span class="pill">Visual literacy</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 3</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Drama</span><span class="pill">Persuasive essay</span><span class="pill">Vocabulary & grammar</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 4</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Poetry</span><span class="pill">Report writing</span><span class="pill">Exam revision</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NATURAL SCIENCES -->
+  <div class="subject-section">
+    <div class="subject-hero">
+      <img src="https://images.unsplash.com/photo-1628595351029-c2bf17511435?w=1600&q=80" alt="Natural Sciences" />
+      <div class="overlay"></div>
+      <div class="hero-text">
+        <span>Subject</span>
+        <h2>Natural Sciences</h2>
+      </div>
+    </div>
+    <div class="topics">
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 1</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Atoms & molecules</span><span class="pill">Elements & compounds</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
+        </div>
+        <div class="term-body open">
+          <span class="pill">Cells & tissues</span><span class="pill">Organs & systems</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 3</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Energy & electricity</span><span class="pill">Magnetism</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="term-header" onclick="toggleTerm(this)">
+          <span class="term-label">Term 4</span><span class="icon">+</span>
+        </div>
+        <div class="term-body">
+          <span class="pill">Tectonic activity</span><span class="pill">Water cycle</span><span class="pill">Revision</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selectedGrade = null;
+
+  // SPLASH — show for 3s then reveal app + grade modal
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      const saved = localStorage.getItem('studynexus_grade');
+      if (saved) {
+        selectedGrade = parseInt(saved);
+        document.getElementById('gradeLabel').textContent = 'Grade ' + saved + ' ▾';
+      } else {
+        document.getElementById('gradeOverlay').classList.add('show');
+      }
+    }, 1000);
+  }, 3000);
+
+  function selectGrade(grade, btn) {
+    selectedGrade = grade;
+    document.querySelectorAll('.grade-btns button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function enterApp() {
+    if (!selectedGrade) return alert('Please pick your grade first!');
+    localStorage.setItem('studynexus_grade', selectedGrade);
+    document.getElementById('gradeLabel').textContent = 'Grade ' + selectedGrade + ' ▾';
+    document.getElementById('gradeOverlay').classList.remove('show');
+  }
+
+  function showGradeModal() {
+    document.getElementById('gradeOverlay').classList.add('show');
+  }
+
+  function toggleTerm(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.icon');
+    body.classList.toggle('open');
+    icon.textContent = body.classList.contains('open') ? '−' : '+';
+  }
+
+  // PARALLAX
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.subject-hero img').forEach(img => {
+      const rect = img.closest('.subject-hero').getBoundingClientRect();
+      const offset = (rect.top / window.innerHeight) * 40;
+      img.style.transform = `translateY(${offset}px)`;
+    });
+  });
+</script>
+</body>
+</html>    }
     #landing .content {
       position: relative; z-index: 2;
       text-align: center; padding: 24px;
