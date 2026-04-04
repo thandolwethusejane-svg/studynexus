@@ -559,30 +559,74 @@
       color: #fff; padding: 10px 24px;
       border-radius: 8px; cursor: pointer; font-size: 14px;
     }
-  </style>
+  #landing {
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; transition: opacity 1s ease;
+}
+#landing.hide { opacity: 0; pointer-events: none; }
+.landing-bg { position: absolute; inset: -20%; z-index: 0; }
+.landing-bg img {
+  width: 100%; height: 140%;
+  object-fit: cover; will-change: transform;
+}
+.landing-overlay {
+  position: absolute; inset: 0;
+  background: rgba(10,15,30,0.6);
+}
+.landing-content {
+  position: relative; z-index: 2;
+  text-align: center; padding: 24px;
+}
+.landing-eyebrow {
+  font-size: 11px; letter-spacing: 0.3em;
+  color: #94a3b8; text-transform: uppercase;
+  margin-bottom: 20px;
+  animation: fadeUp 1s ease 0.5s both;
+}
+.landing-title {
+  font-size: 48px; font-weight: 800;
+  line-height: 1.1; color: #fff;
+  margin-bottom: 16px;
+  animation: fadeUp 1s ease 0.8s both;
+}
+.landing-sub {
+  font-size: 15px; color: #94a3b8;
+  margin-bottom: 36px;
+  animation: fadeUp 1s ease 1.1s both;
+}
+.landing-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; padding: 14px 32px;
+  border-radius: 30px; font-size: 15px;
+  cursor: pointer; letter-spacing: 0.05em;
+  animation: fadeUp 1s ease 1.4s both;
+  transition: background 0.2s, border-color 0.2s;
+}
+.landing-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.6);
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
 </head>
 <body>
 
 <!-- LANDING -->
 <div id="landing">
-  <div class="bg"></div>
-  <div class="content">
-    <div class="badge"><span></span> CAPS curriculum · Grade 8–12</div>
-    <h1>Study Nexus</h1>
-    <p>Your personalised study companion</p>
-    <div class="card">
-      <p>What grade are you in?</p>
-      <h2>Let's set up your experience</h2>
-      <div class="grade-btns">
-        <button onclick="selectGrade(8,this)">8</button>
-        <button onclick="selectGrade(9,this)">9</button>
-        <button onclick="selectGrade(10,this)">10</button>
-        <button class="active" onclick="selectGrade(11,this)">11</button>
-        <button onclick="selectGrade(12,this)">12</button>
-      </div>
-      <button class="start-btn" onclick="goToGrade()">Get started</button>
-      <p class="hint">No sign-up needed to explore</p>
-    </div>
+  <div class="landing-bg">
+    <img id="landingImg" src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1600&q=80" alt="bg" />
+    <div class="landing-overlay"></div>
+  </div>
+  <div class="landing-content">
+    <p class="landing-eyebrow">Your CAPS Study Companion</p>
+    <h1 class="landing-title">WELCOME TO<br>STUDY NEXUS</h1>
+    <p class="landing-sub">Learn smarter. Study better. Go further.</p>
+    <button class="landing-btn" onclick="enterLanding()">Get Started →</button>
   </div>
 </div>
 
@@ -790,6 +834,26 @@ window.addEventListener('scroll', () => {
     const offset = (rect.top / window.innerHeight) * 40;
     img.style.transform = `translateY(${offset}px)`;
   });
+});
+  function enterLanding() {
+  document.getElementById('landing').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('landing').style.display = 'none';
+    const saved = localStorage.getItem('studynexus_grade');
+    if (saved) {
+      document.getElementById('gradeLabel').textContent = 'Grade ' + saved + ' ▾';
+    } else {
+      document.getElementById('gradeOverlay').classList.add('show');
+    }
+  }, 1000);
+}
+
+window.addEventListener('mousemove', (e) => {
+  const img = document.getElementById('landingImg');
+  if (!img) return;
+  const x = (e.clientX / window.innerWidth - 0.5) * 20;
+  const y = (e.clientY / window.innerHeight - 0.5) * 20;
+  img.style.transform = `translate(${x}px, ${y}px)`;
 });
 </script>
 </body>
