@@ -6,387 +6,659 @@
   <title>Study Nexus</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0a0f1e; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+    html { scroll-behavior: smooth; }
+    body { background: #060914; color: #fff; font-family: -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
 
-    /* SPLASH */
-    #splash {
-      position: fixed; inset: 0; z-index: 1000;
-      background: #0a0f1e;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      transition: opacity 1s ease;
+    /* ===================== NAV ===================== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 32px;
+      transition: background 0.4s, border-color 0.4s;
     }
-    #splash.hide { opacity: 0; pointer-events: none; }
-    #splash h1 {
-      font-size: 13px; letter-spacing: 0.3em;
-      color: #94a3b8; text-transform: uppercase;
-      margin-bottom: 20px; opacity: 0;
-      animation: fadeUp 1s ease 0.5s forwards;
+    nav.scrolled {
+      background: rgba(6,9,20,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    #splash h2 {
-      font-size: 38px; font-weight: 700;
-      color: #fff; text-align: center;
-      opacity: 0; animation: fadeUp 1s ease 1s forwards;
+    .nav-logo { font-size: 15px; font-weight: 700; letter-spacing: 0.08em; color: #fff; }
+    .nav-cta {
+      padding: 8px 20px;
+      background: #fff; color: #060914;
+      border: none; border-radius: 30px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
     }
-    #splash .line {
-      width: 60px; height: 2px;
-      background: #2563eb; margin: 20px auto;
-      opacity: 0; animation: fadeUp 1s ease 1.5s forwards;
-    }
-    #splash p {
-      font-size: 14px; color: #64748b;
-      opacity: 0; animation: fadeUp 1s ease 2s forwards;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* ===================== HERO ===================== */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
     }
 
-    /* GRADE MODAL OVERLAY */
-    #gradeOverlay {
-      display: none;
-      position: fixed; inset: 0; z-index: 500;
-      backdrop-filter: blur(12px);
-      background: rgba(10,15,30,0.5);
-      align-items: center; justify-content: center;
+    /* Orb layer — parallax on scroll */
+    .orbs {
+      position: absolute; inset: 0; z-index: 0;
+      pointer-events: none;
     }
-    #gradeOverlay.show { display: flex; }
-    .grade-modal {
-      background: rgba(15,23,42,0.95);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px; padding: 32px 28px;
-      width: 90%; max-width: 340px; text-align: center;
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); will-change: transform;
     }
-    .grade-modal .eyebrow {
-      font-size: 11px; letter-spacing: 0.2em;
-      color: #64748b; text-transform: uppercase; margin-bottom: 10px;
+    .orb-1 { width: 600px; height: 600px; top: -100px; left: -150px; background: radial-gradient(circle, rgba(37,99,235,0.45), transparent 70%); }
+    .orb-2 { width: 500px; height: 500px; top: 100px; right: -100px; background: radial-gradient(circle, rgba(124,58,237,0.4), transparent 70%); }
+    .orb-3 { width: 400px; height: 400px; bottom: -50px; left: 30%; background: radial-gradient(circle, rgba(6,182,212,0.25), transparent 70%); }
+    .orb-4 { width: 300px; height: 300px; top: 40%; right: 20%; background: radial-gradient(circle, rgba(244,114,182,0.2), transparent 70%); }
+
+    /* Particle grid */
+    .grid-lines {
+      position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
     }
-    .grade-modal h2 {
-      font-size: 22px; font-weight: 600;
-      margin-bottom: 6px;
+
+    .hero-content {
+      position: relative; z-index: 2;
+      text-align: center; padding: 120px 24px 80px;
+      max-width: 640px; width: 100%;
     }
-    .grade-modal p {
-      font-size: 13px; color: #64748b; margin-bottom: 24px;
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 30px; padding: 6px 16px;
+      font-size: 12px; color: rgba(255,255,255,0.65);
+      letter-spacing: 0.05em; margin-bottom: 28px;
+      animation: fadeUp 0.7s ease 0.2s both;
     }
-    .grade-btns {
-      display: grid; grid-template-columns: repeat(5,1fr);
-      gap: 8px; margin-bottom: 20px;
+    .hero-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #4ade80; box-shadow: 0 0 8px #4ade80;
+      animation: blink 2s ease infinite;
     }
-    .grade-btns button {
-      padding: 12px 4px;
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .hero-title {
+      font-size: clamp(42px, 10vw, 72px);
+      font-weight: 800; line-height: 1.05;
+      letter-spacing: -0.03em; margin-bottom: 20px;
+      animation: fadeUp 0.7s ease 0.4s both;
+    }
+    .hero-title .accent {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 17px; color: rgba(255,255,255,0.55);
+      line-height: 1.7; max-width: 400px; margin: 0 auto 40px;
+      animation: fadeUp 0.7s ease 0.6s both;
+    }
+
+    .hero-btns {
+      display: flex; gap: 14px; justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.7s ease 0.8s both;
+    }
+    /* These two move opposite on scroll — controlled by JS */
+    #btn-left {
+      padding: 15px 32px;
+      background: #fff; color: #060914;
+      border: none; border-radius: 30px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; will-change: transform;
+      transition: box-shadow 0.2s;
+    }
+    #btn-left:hover { box-shadow: 0 8px 30px rgba(255,255,255,0.25); }
+    #btn-right {
+      padding: 15px 32px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 30px; color: #fff;
+      font-size: 15px; font-weight: 500;
+      cursor: pointer; will-change: transform;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #btn-right:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); }
+
+    .hero-trust {
+      margin-top: 24px; font-size: 12px;
+      color: rgba(255,255,255,0.28);
+      animation: fadeUp 0.7s ease 1s both;
+    }
+
+    /* scroll indicator */
+    .scroll-hint {
+      position: absolute; bottom: 36px; left: 50%;
+      transform: translateX(-50%); z-index: 2;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      opacity: 0; animation: fadeIn 1s ease 2s forwards;
+    }
+    .scroll-hint span { font-size: 11px; letter-spacing: 0.15em; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+    .scroll-arrow {
+      width: 20px; height: 20px;
+      border-right: 1.5px solid rgba(255,255,255,0.25);
+      border-bottom: 1.5px solid rgba(255,255,255,0.25);
+      transform: rotate(45deg);
+      animation: bounce 1.5s ease infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(4px)} }
+    @keyframes fadeIn { to { opacity:1 } }
+
+    /* ===================== SECTIONS SHARED ===================== */
+    section {
+      position: relative; padding: 100px 24px;
+      max-width: 900px; margin: 0 auto;
+    }
+    .section-eyebrow {
+      font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); margin-bottom: 14px; text-align: center;
+    }
+    .section-title {
+      font-size: clamp(28px, 5vw, 44px); font-weight: 800;
+      letter-spacing: -0.02em; text-align: center; margin-bottom: 12px;
+    }
+    .section-sub {
+      font-size: 16px; color: rgba(255,255,255,0.5);
+      text-align: center; max-width: 400px; margin: 0 auto 56px;
+      line-height: 1.6;
+    }
+
+    /* Reveal animation */
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ===================== GRADE SECTION ===================== */
+    #grades { text-align: center; }
+
+    .grade-cards {
+      display: flex; gap: 12px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 36px;
+    }
+    .grade-card {
+      width: 90px; height: 110px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; color: #64748b;
-      font-size: 15px; cursor: pointer; transition: all 0.2s;
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
     }
-    .grade-btns button.active {
-      background: rgba(37,99,235,0.15);
-      border-color: rgba(37,99,235,0.4);
-      color: #fff;
+    .grade-card:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+    .grade-card.active {
+      background: rgba(37,99,235,0.2);
+      border-color: rgba(37,99,235,0.6);
     }
-    .start-btn {
-      width: 100%; padding: 14px;
-      background: #2563eb; border: none;
-      border-radius: 12px; color: #fff;
-      font-size: 15px; font-weight: 500; cursor: pointer;
-      transition: opacity 0.2s;
+    .grade-card .grade-num {
+      font-size: 28px; font-weight: 800; color: #fff;
     }
-    .start-btn:hover { opacity: 0.9; }
+    .grade-card .grade-label {
+      font-size: 10px; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4); text-transform: uppercase;
+    }
+    .grade-card.active .grade-label { color: #93c5fd; }
 
-    /* TOP BAR */
+    .grade-cta {
+      padding: 14px 40px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border: none; border-radius: 30px; color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      opacity: 0.5; pointer-events: none;
+    }
+    .grade-cta.ready { opacity: 1; pointer-events: all; }
+    .grade-cta.ready:hover { transform: translateY(-2px); }
+
+    /* ===================== PRICING ===================== */
+    #pricing { text-align: center; }
+
+    .pricing-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; max-width: 640px; margin: 0 auto;
+    }
+    @media (max-width: 520px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+    .price-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 28px 24px;
+      text-align: left; position: relative;
+      transition: transform 0.2s;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured {
+      background: rgba(37,99,235,0.12);
+      border-color: rgba(37,99,235,0.5);
+    }
+    .price-badge {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+    .price-tier { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em; }
+    .price-amount { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
+    .price-amount span { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.4); }
+    .price-desc { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 24px; line-height: 1.5; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .price-features li { font-size: 13px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 10px; }
+    .price-features li::before { content: ''; width: 16px; height: 16px; border-radius: 50%; background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.4); flex-shrink: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 8l3.5 3.5L13 5' stroke='%234ade80' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: 12px; background-repeat: no-repeat; background-position: center; }
+    .price-btn {
+      width: 100%; padding: 13px;
+      border-radius: 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .price-btn.outlined {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2); color: #fff;
+    }
+    .price-btn.filled {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      border: none; color: #fff;
+    }
+    .price-btn:hover { opacity: 0.85; }
+
+    /* ===================== REVIEWS ===================== */
+    #reviews { text-align: center; }
+
+    .reviews-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .review-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 22px 20px;
+      text-align: left;
+    }
+    .review-stars { display: flex; gap: 3px; margin-bottom: 12px; }
+    .review-stars span { font-size: 14px; color: #fbbf24; }
+    .review-text { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.65; margin-bottom: 16px; }
+    .review-author { display: flex; align-items: center; gap: 10px; }
+    .review-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+    }
+    .review-name { font-size: 13px; font-weight: 600; }
+    .review-meta { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ===================== FOOTER CTA ===================== */
+    #footer-cta {
+      text-align: center; padding: 100px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    #footer-cta .orb-footer {
+      position: absolute; width: 500px; height: 500px;
+      border-radius: 50%; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(37,99,235,0.2), transparent 70%);
+      filter: blur(60px); pointer-events: none;
+    }
+    #footer-cta h2 {
+      font-size: clamp(28px, 5vw, 48px); font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 16px;
+      position: relative;
+    }
+    #footer-cta p { font-size: 16px; color: rgba(255,255,255,0.45); margin-bottom: 36px; position: relative; }
+    .footer-btn {
+      padding: 16px 48px;
+      background: #fff; color: #060914;
+      border: none; border-radius: 30px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; position: relative;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .footer-btn:hover { box-shadow: 0 12px 40px rgba(255,255,255,0.2); transform: translateY(-2px); }
+
+    footer {
+      text-align: center; padding: 24px;
+      font-size: 12px; color: rgba(255,255,255,0.2);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+
+    /* ===================== APP (post-landing) ===================== */
+    #app { display: none; }
     .topbar {
       position: sticky; top: 0; z-index: 100;
       display: flex; justify-content: space-between; align-items: center;
       padding: 14px 20px;
-      background: rgba(10,15,30,0.9);
+      background: rgba(6,9,20,0.9);
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
     }
-    .topbar h1 {
-      font-size: 16px; font-weight: 600;
-      letter-spacing: 0.05em; cursor: pointer;
-      color: #fff;
-    }
+    .topbar h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer; }
     .grade-switcher {
       background: transparent;
       border: 1px solid rgba(255,255,255,0.1);
       color: #94a3b8; padding: 6px 14px;
       border-radius: 20px; font-size: 13px; cursor: pointer;
     }
-
-    /* SUBJECT SECTIONS */
     .subject-section { position: relative; }
     .subject-hero {
-      position: relative; height: 520px;
-      display: flex; align-items: flex-end;
-      justify-content: flex-start;
+      position: relative; height: 380px;
+      display: flex; align-items: flex-end; padding: 28px 24px;
       overflow: hidden;
-      padding: 32px 24px;
     }
     .subject-hero img {
-      position: absolute; inset: -20%;
-      width: 100%; height: 140%;
+      position: absolute; inset: -20%; width: 100%; height: 140%;
       object-fit: cover; will-change: transform;
     }
     .subject-hero .overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.2) 60%, transparent 100%);
+      background: linear-gradient(to top, rgba(6,9,20,0.95) 0%, rgba(6,9,20,0.1) 70%, transparent 100%);
     }
-    .subject-hero .hero-text {
-      position: relative; z-index: 2;
-    }
-    .subject-hero .hero-text span {
-      font-size: 11px; letter-spacing: 0.25em;
-      color: #64748b; text-transform: uppercase; display: block;
-      margin-bottom: 6px;
-    }
-    .subject-hero .hero-text h2 {
-      font-size: 32px; font-weight: 700; color: #fff;
-    }
-
-    /* TOPICS */
+    .subject-hero .hero-text { position: relative; z-index: 2; }
+    .subject-hero .hero-text span { font-size: 11px; letter-spacing: 0.2em; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .subject-hero .hero-text h2 { font-size: 28px; font-weight: 700; }
     .topics { padding: 0 20px 40px; }
-    .term {
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .term-header {
-      display: flex; justify-content: space-between;
-      align-items: center; padding: 16px 0;
-      cursor: pointer;
-    }
-    .term-header .term-label {
-      font-size: 13px; color: #475569;
-      letter-spacing: 0.05em;
-    }
+    .term { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .term-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; cursor: pointer; }
+    .term-header .term-label { font-size: 13px; color: #475569; }
     .term-header .term-label.current { color: #cbd5e1; }
     .term-header .icon { font-size: 16px; color: #334155; }
-    .term-body {
-      display: none; padding-bottom: 16px;
-      flex-wrap: wrap; gap: 6px;
-    }
+    .term-body { display: none; padding-bottom: 16px; flex-wrap: wrap; gap: 6px; }
     .term-body.open { display: flex; }
-    .pill {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      color: #94a3b8; border-radius: 20px;
-      padding: 4px 12px; font-size: 12px;
-    }
+    .pill { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: #94a3b8; border-radius: 20px; padding: 4px 12px; font-size: 12px; }
   </style>
 </head>
 <body>
 
-<!-- SPLASH -->
-<div id="splash">
-  <h1>Welcome to</h1>
-  <h2>Study Nexus</h2>
-  <div class="line"></div>
-  <p>Your personalised CAPS study companion</p>
-</div>
+<!-- ========== LANDING PAGE ========== -->
+<div id="landing">
 
-<!-- GRADE MODAL -->
-<div id="gradeOverlay">
-  <div class="grade-modal">
-    <p class="eyebrow">Before you begin</p>
-    <h2>What grade are you in?</h2>
-    <p>This helps us show you the right content</p>
-    <div class="grade-btns">
-      <button onclick="selectGrade(8,this)">8</button>
-      <button onclick="selectGrade(9,this)">9</button>
-      <button onclick="selectGrade(10,this)">10</button>
-      <button onclick="selectGrade(11,this)">11</button>
-      <button onclick="selectGrade(12,this)">12</button>
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-logo">STUDY NEXUS</div>
+    <button class="nav-cta" onclick="scrollToGrades()">Get Started</button>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="orbs">
+      <div class="orb orb-1" id="orb1"></div>
+      <div class="orb orb-2" id="orb2"></div>
+      <div class="orb orb-3" id="orb3"></div>
+      <div class="orb orb-4" id="orb4"></div>
     </div>
-    <button class="start-btn" onclick="enterApp()">Let's go</button>
+    <div class="grid-lines"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Built for SA students · CAPS aligned
+      </div>
+      <h1 class="hero-title">
+        Study Smarter.<br>
+        <span class="accent">Score Higher.</span>
+      </h1>
+      <p class="hero-sub">
+        Your AI-powered CAPS study companion for Grade 8–12. Master your subjects and hit Ad Perfectionem.
+      </p>
+      <div class="hero-btns">
+        <button id="btn-left" onclick="scrollToGrades()">Get Started Free</button>
+        <button id="btn-right" onclick="scrollToPricing()">Get Premium · R29/mo →</button>
+      </div>
+      <p class="hero-trust">No credit card needed · Cancel anytime</p>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- GRADE SELECTOR -->
+  <div style="background: linear-gradient(to bottom, transparent, rgba(37,99,235,0.04), transparent);">
+    <section id="grades">
+      <p class="section-eyebrow reveal">Your journey</p>
+      <h2 class="section-title reveal reveal-delay-1">What grade are you in?</h2>
+      <p class="section-sub reveal reveal-delay-2">We personalise your content, quizzes and study plan to your exact grade and CAPS curriculum.</p>
+
+      <div class="grade-cards reveal reveal-delay-2">
+        <div class="grade-card" onclick="pickGrade(8, this)">
+          <span class="grade-num">8</span>
+          <span class="grade-label">Grade</span>
+        </div>
+        <div class="grade-card" onclick="pickGrade(9, this)">
+          <span class="grade-num">9</span>
+          <span class="grade-label">Grade</span>
+        </div>
+        <div class="grade-card" onclick="pickGrade(10, this)">
+          <span class="grade-num">10</span>
+          <span class="grade-label">Grade</span>
+        </div>
+        <div class="grade-card" onclick="pickGrade(11, this)">
+          <span class="grade-num">11</span>
+          <span class="grade-label">Grade</span>
+        </div>
+        <div class="grade-card" onclick="pickGrade(12, this)">
+          <span class="grade-num">12</span>
+          <span class="grade-label">Grade</span>
+        </div>
+      </div>
+
+      <button class="grade-cta reveal reveal-delay-3" id="gradeCta" onclick="enterApp()">
+        Start Learning →
+      </button>
+    </section>
   </div>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <p class="section-eyebrow reveal">Simple pricing</p>
+    <h2 class="section-title reveal reveal-delay-1">Free to start.<br>Powerful when you need it.</h2>
+    <p class="section-sub reveal reveal-delay-2">Start for free, upgrade when you're ready to unlock AI tutoring and unlimited practice.</p>
+
+    <div class="pricing-grid">
+      <div class="price-card reveal reveal-delay-2">
+        <p class="price-tier">Free</p>
+        <p class="price-amount">R0 <span>/ forever</span></p>
+        <p class="price-desc">Everything you need to get started with CAPS content.</p>
+        <ul class="price-features">
+          <li>Full CAPS curriculum access</li>
+          <li>Topic summaries per subject</li>
+          <li>Grade 8–12 content</li>
+          <li>10 AI questions per day</li>
+          <li>Progress tracker</li>
+        </ul>
+        <button class="price-btn outlined" onclick="scrollToGrades()">Get Started Free</button>
+      </div>
+
+      <div class="price-card featured reveal reveal-delay-3">
+        <div class="price-badge">Most Popular</div>
+        <p class="price-tier">Premium</p>
+        <p class="price-amount">R29 <span>/ month</span></p>
+        <p class="price-desc">AI tutoring + unlimited practice for students who want to excel.</p>
+        <ul class="price-features">
+          <li>Everything in Free</li>
+          <li>Unlimited AI tutoring</li>
+          <li>Past paper practice</li>
+          <li>XP, streaks & leaderboards</li>
+          <li>ADHD focus tools</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="price-btn filled" onclick="scrollToGrades()">Start Premium</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews">
+    <p class="section-eyebrow reveal">Student love</p>
+    <h2 class="section-title reveal reveal-delay-1">Real students. Real results.</h2>
+    <p class="section-sub reveal reveal-delay-2">From Vaal to Joburg to Cape Town — students across SA are studying smarter.</p>
+
+    <div class="reviews-grid">
+      <div class="review-card reveal reveal-delay-1">
+        <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">"I went from a 54% to a 72% in Maths in one term. The AI explains things in a way my teacher doesn't have time to."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:rgba(37,99,235,0.2);color:#60a5fa;">TM</div>
+          <div>
+            <p class="review-name">Thabo M.</p>
+            <p class="review-meta">Grade 11 · Vereeniging</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-2">
+        <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">"Afrikaans was my worst subject. The summaries and practice questions on here are exactly what CAPS asks. Game changer."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:rgba(124,58,237,0.2);color:#a78bfa;">NP</div>
+          <div>
+            <p class="review-name">Naledi P.</p>
+            <p class="review-meta">Grade 10 · Soweto</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-3">
+        <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">"R29 a month is literally nothing compared to what private tutors cost. Worth every cent for matric prep."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:rgba(6,182,212,0.2);color:#67e8f9;">KD</div>
+          <div>
+            <p class="review-name">Keanu D.</p>
+            <p class="review-meta">Grade 12 · Cape Town</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-2">
+        <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">"The streaks feature keeps me consistent. I've studied every day for 3 weeks now and my marks are showing it."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:rgba(244,114,182,0.2);color:#f472b6;">SN</div>
+          <div>
+            <p class="review-name">Siphokazi N.</p>
+            <p class="review-meta">Grade 9 · Durban</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-3">
+        <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">"Finally a study app that actually knows the SA curriculum. Not some American thing that confuses me more."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:rgba(251,191,36,0.2);color:#fbbf24;">LM</div>
+          <div>
+            <p class="review-name">Lebo M.</p>
+            <p class="review-meta">Grade 11 · Pretoria</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card reveal reveal-delay-4">
+        <div class="review-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="review-text">"The ADHD tools help me so much. I can actually focus on one topic at a time without getting overwhelmed."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:rgba(74,222,128,0.2);color:#4ade80;">AV</div>
+          <div>
+            <p class="review-name">Aisha V.</p>
+            <p class="review-meta">Grade 10 · Johannesburg</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER CTA -->
+  <div id="footer-cta">
+    <div class="orb-footer"></div>
+    <h2 class="reveal">Ready to score higher?</h2>
+    <p class="reveal reveal-delay-1">Join thousands of SA students studying smarter every day.</p>
+    <button class="footer-btn reveal reveal-delay-2" onclick="scrollToGrades()">Start for Free →</button>
+  </div>
+
+  <footer>
+    © 2026 Study Nexus · Built for South Africa · CAPS Aligned
+  </footer>
+
 </div>
 
-<!-- MAIN APP -->
+<!-- ========== APP (after grade selected) ========== -->
 <div id="app">
   <div class="topbar">
-    <h1 onclick="location.reload()">Study Nexus</h1>
-    <button class="grade-switcher" onclick="showGradeModal()" id="gradeLabel">Grade —</button>
+    <h1 onclick="goHome()">Study Nexus</h1>
+    <button class="grade-switcher" id="gradeLabel">Grade —</button>
   </div>
 
-  <!-- MATHEMATICS -->
   <div class="subject-section">
     <div class="subject-hero">
       <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1600&q=80" alt="Mathematics" />
       <div class="overlay"></div>
-      <div class="hero-text">
-        <span>Subject</span>
-        <h2>Mathematics</h2>
-      </div>
+      <div class="hero-text"><span>Subject</span><h2>Mathematics</h2></div>
     </div>
     <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 1</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Whole numbers</span><span class="pill">Integers</span><span class="pill">Exponents</span><span class="pill">Numeric & geometric patterns</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
-        </div>
-        <div class="term-body open">
-          <span class="pill">Functions & relationships</span><span class="pill">Algebraic expressions</span><span class="pill">Algebraic equations</span><span class="pill">Graphs</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 3</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Geometry of 2D shapes</span><span class="pill">Geometry of straight lines</span><span class="pill">Pythagoras</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 4</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Area & perimeter</span><span class="pill">Surface area & volume</span><span class="pill">Data handling</span><span class="pill">Probability</span>
-        </div>
-      </div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 1</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Whole numbers</span><span class="pill">Integers</span><span class="pill">Exponents</span><span class="pill">Patterns</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label current">Term 2 · Current</span><span class="icon">−</span></div><div class="term-body open"><span class="pill">Functions & relationships</span><span class="pill">Algebraic expressions</span><span class="pill">Algebraic equations</span><span class="pill">Graphs</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 3</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Geometry of 2D shapes</span><span class="pill">Straight lines</span><span class="pill">Pythagoras</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 4</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Area & perimeter</span><span class="pill">Surface area & volume</span><span class="pill">Data handling</span><span class="pill">Probability</span></div></div>
     </div>
   </div>
 
-  <!-- AFRIKAANS -->
   <div class="subject-section">
     <div class="subject-hero">
       <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80" alt="Afrikaans" />
       <div class="overlay"></div>
-      <div class="hero-text">
-        <span>Subject</span>
-        <h2>Afrikaans EAT</h2>
-      </div>
+      <div class="hero-text"><span>Subject</span><h2>Afrikaans EAT</h2></div>
     </div>
     <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 1</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Leesbegrip</span><span class="pill">Kort stories</span><span class="pill">Taalstrukture & woordeskat</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
-        </div>
-        <div class="term-body open">
-          <span class="pill">Formele brief</span><span class="pill">Advertensie</span><span class="pill">Begrip & visuele tekste</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 3</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Drama teks</span><span class="pill">Opstel skryf</span><span class="pill">Visuele geletterdheid</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 4</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Gedigte</span><span class="pill">Hersiening</span><span class="pill">Eksamenvoorbereiding</span>
-        </div>
-      </div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 1</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Leesbegrip</span><span class="pill">Kort stories</span><span class="pill">Taalstrukture</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label current">Term 2 · Current</span><span class="icon">−</span></div><div class="term-body open"><span class="pill">Formele brief</span><span class="pill">Advertensie</span><span class="pill">Begrip & visuele tekste</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 3</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Drama teks</span><span class="pill">Opstel skryf</span><span class="pill">Visuele geletterdheid</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 4</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Gedigte</span><span class="pill">Hersiening</span><span class="pill">Eksamenvoorbereiding</span></div></div>
     </div>
   </div>
 
-  <!-- ENGLISH -->
   <div class="subject-section">
     <div class="subject-hero">
       <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&q=80" alt="English" />
       <div class="overlay"></div>
-      <div class="hero-text">
-        <span>Subject</span>
-        <h2>English HL</h2>
-      </div>
+      <div class="hero-text"><span>Subject</span><h2>English HL</h2></div>
     </div>
     <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 1</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Short stories</span><span class="pill">Transactional writing</span><span class="pill">Language structures</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
-        </div>
-        <div class="term-body open">
-          <span class="pill">Novel study</span><span class="pill">Formal letter</span><span class="pill">Comprehension</span><span class="pill">Visual literacy</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 3</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Drama</span><span class="pill">Persuasive essay</span><span class="pill">Vocabulary & grammar</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 4</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Poetry</span><span class="pill">Report writing</span><span class="pill">Exam revision</span>
-        </div>
-      </div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 1</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Short stories</span><span class="pill">Transactional writing</span><span class="pill">Language structures</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label current">Term 2 · Current</span><span class="icon">−</span></div><div class="term-body open"><span class="pill">Novel study</span><span class="pill">Formal letter</span><span class="pill">Comprehension</span><span class="pill">Visual literacy</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 3</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Drama</span><span class="pill">Persuasive essay</span><span class="pill">Vocabulary & grammar</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 4</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Poetry</span><span class="pill">Report writing</span><span class="pill">Exam revision</span></div></div>
     </div>
   </div>
 
-  <!-- NATURAL SCIENCES -->
   <div class="subject-section">
     <div class="subject-hero">
       <img src="https://images.unsplash.com/photo-1628595351029-c2bf17511435?w=1600&q=80" alt="Natural Sciences" />
       <div class="overlay"></div>
-      <div class="hero-text">
-        <span>Subject</span>
-        <h2>Natural Sciences</h2>
-      </div>
+      <div class="hero-text"><span>Subject</span><h2>Natural Sciences</h2></div>
     </div>
     <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 1</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Atoms & molecules</span><span class="pill">Elements & compounds</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label current">Term 2 · Current</span><span class="icon">−</span>
-        </div>
-        <div class="term-body open">
-          <span class="pill">Cells & tissues</span><span class="pill">Organs & systems</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 3</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Energy & electricity</span><span class="pill">Magnetism</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span class="term-label">Term 4</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Tectonic activity</span><span class="pill">Water cycle</span><span class="pill">Revision</span>
-        </div>
-      </div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 1</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Atoms & molecules</span><span class="pill">Elements & compounds</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label current">Term 2 · Current</span><span class="icon">−</span></div><div class="term-body open"><span class="pill">Cells & tissues</span><span class="pill">Organs & systems</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 3</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Energy & electricity</span><span class="pill">Magnetism</span></div></div>
+      <div class="term"><div class="term-header" onclick="toggleTerm(this)"><span class="term-label">Term 4</span><span class="icon">+</span></div><div class="term-body"><span class="pill">Tectonic activity</span><span class="pill">Water cycle</span><span class="pill">Revision</span></div></div>
     </div>
   </div>
 </div>
@@ -394,408 +666,87 @@
 <script>
   let selectedGrade = null;
 
-  // SPLASH — show for 3s then reveal app + grade modal
-  setTimeout(() => {
-    document.getElementById('splash').classList.add('hide');
-    setTimeout(() => {
-      document.getElementById('splash').style.display = 'none';
-      const saved = localStorage.getItem('studynexus_grade');
-      if (saved) {
-        selectedGrade = parseInt(saved);
-        document.getElementById('gradeLabel').textContent = 'Grade ' + saved + ' ▾';
-      } else {
-        document.getElementById('gradeOverlay').classList.add('show');
-      }
-    }, 1000);
-  }, 3000);
-
-  function selectGrade(grade, btn) {
-    selectedGrade = grade;
-    document.querySelectorAll('.grade-btns button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-
-  function enterApp() {
-    if (!selectedGrade) return alert('Please pick your grade first!');
-    localStorage.setItem('studynexus_grade', selectedGrade);
-    document.getElementById('gradeLabel').textContent = 'Grade ' + selectedGrade + ' ▾';
-    document.getElementById('gradeOverlay').classList.remove('show');
-  }
-
-  function showGradeModal() {
-    document.getElementById('gradeOverlay').classList.add('show');
-  }
-
-  function toggleTerm(header) {
-    const body = header.nextElementSibling;
-    const icon = header.querySelector('.icon');
-    body.classList.toggle('open');
-    icon.textContent = body.classList.contains('open') ? '−' : '+';
-  }
-
-  // PARALLAX
+  /* ---- Scroll-based parallax ---- */
   window.addEventListener('scroll', () => {
+    const sy = window.scrollY;
+    const wh = window.innerHeight;
+
+    /* Nav background */
+    document.getElementById('navbar').classList.toggle('scrolled', sy > 40);
+
+    /* Orb parallax — each moves at different speed */
+    const o1 = document.getElementById('orb1');
+    const o2 = document.getElementById('orb2');
+    const o3 = document.getElementById('orb3');
+    const o4 = document.getElementById('orb4');
+    if (o1) o1.style.transform = `translateY(${sy * 0.25}px)`;
+    if (o2) o2.style.transform = `translateY(${sy * -0.18}px) translateX(${sy * 0.05}px)`;
+    if (o3) o3.style.transform = `translateY(${sy * 0.12}px)`;
+    if (o4) o4.style.transform = `translateY(${sy * -0.22}px)`;
+
+    /* Buttons drift opposite directions */
+    const progress = Math.min(sy / (wh * 0.6), 1);
+    const btnL = document.getElementById('btn-left');
+    const btnR = document.getElementById('btn-right');
+    if (btnL) btnL.style.transform = `translateX(${progress * -28}px)`;
+    if (btnR) btnR.style.transform = `translateX(${progress * 28}px)`;
+
+    /* Subject image parallax */
     document.querySelectorAll('.subject-hero img').forEach(img => {
       const rect = img.closest('.subject-hero').getBoundingClientRect();
-      const offset = (rect.top / window.innerHeight) * 40;
+      const offset = (rect.top / wh) * 40;
       img.style.transform = `translateY(${offset}px)`;
     });
+
+    /* Scroll reveal */
+    document.querySelectorAll('.reveal').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < wh * 0.88) el.classList.add('visible');
+    });
   });
-</script>
-</body>
-</html>    }
-    #landing .content {
-      position: relative; z-index: 2;
-      text-align: center; padding: 24px;
-      width: 100%; max-width: 400px;
-    }
-    .badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(37,99,235,0.2);
-      border: 1px solid rgba(37,99,235,0.5);
-      border-radius: 20px; padding: 4px 14px;
-      font-size: 12px; color: #93c5fd; margin-bottom: 16px;
-    }
-    .badge span { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; display: inline-block; }
-    #landing h1 { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
-    #landing p { color: #94a3b8; font-size: 15px; margin-bottom: 28px; }
 
-    .card {
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px; padding: 28px 24px;
-    }
-    .card p { font-size: 13px; color: #94a3b8; margin-bottom: 6px; }
-    .card h2 { font-size: 17px; font-weight: 500; margin-bottom: 20px; }
+  /* Mouse parallax on orbs */
+  window.addEventListener('mousemove', (e) => {
+    if (window.scrollY > window.innerHeight) return;
+    const x = (e.clientX / window.innerWidth - 0.5);
+    const y = (e.clientY / window.innerHeight - 0.5);
+    const o1 = document.getElementById('orb1');
+    const o2 = document.getElementById('orb2');
+    if (o1) o1.style.transform = `translate(${x * 30}px, ${y * 20 + window.scrollY * 0.25}px)`;
+    if (o2) o2.style.transform = `translate(${x * -20}px, ${y * 15 + window.scrollY * -0.18}px)`;
+  });
 
-    .grade-btns {
-      display: grid; grid-template-columns: repeat(5, 1fr);
-      gap: 8px; margin-bottom: 18px;
-    }
-    .grade-btns button {
-      padding: 10px 4px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px; color: #94a3b8;
-      font-size: 14px; cursor: pointer;
-    }
-    .grade-btns button.active {
-      background: rgba(37,99,235,0.3);
-      border-color: #2563eb; color: #93c5fd;
-    }
-    .start-btn {
-      width: 100%; padding: 13px;
-      background: #2563eb; border: none;
-      border-radius: 10px; color: #fff;
-      font-size: 15px; font-weight: 500; cursor: pointer;
-    }
-    .hint { font-size: 11px; color: #475569; text-align: center; margin-top: 10px; }
+  /* ---- Navigation helpers ---- */
+  function scrollToGrades() {
+    document.getElementById('grades').scrollIntoView({ behavior: 'smooth' });
+  }
+  function scrollToPricing() {
+    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+  }
 
-    /* GRADE 8 PAGE */
-    #grade8 { display: none; }
-    .subject-section { margin-bottom: 0; }
-    .subject-hero {
-  position: relative; height: 350px;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-.subject-hero img {
-  position: absolute; inset: -20%;
-  width: 100%; height: 140%;
-  object-fit: cover;
-  will-change: transform;
-}
-    .subject-hero .overlay {
-      position: absolute; inset: 0;
-      background: rgba(10,15,30,0.6);
-    }
-    .subject-hero h2 {
-      position: relative; z-index: 2;
-      font-size: 28px; font-weight: 700;
-      text-align: center; color: #fff;
-    }
-
-    .topics { padding: 20px 16px; }
-    .term {
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px; margin-bottom: 10px;
-      overflow: hidden;
-    }
-    .term-header {
-      display: flex; justify-content: space-between;
-      align-items: center; padding: 14px 16px;
-      cursor: pointer; background: rgba(255,255,255,0.03);
-    }
-    .term-header span { font-size: 14px; font-weight: 500; }
-    .term-header .icon { font-size: 18px; color: #94a3b8; }
-    .term-header.active { background: rgba(37,99,235,0.15); }
-    .term-header.active span { color: #93c5fd; }
-    .term-body { display: none; padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
-    .term-body.open { display: flex; }
-    .pill {
-      background: rgba(37,99,235,0.2);
-      border: 1px solid rgba(37,99,235,0.4);
-      color: #93c5fd; border-radius: 20px;
-      padding: 4px 12px; font-size: 13px;
-    }
-
-    /* GRADE MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.7); z-index: 999;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: #0f172a;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px; padding: 28px 24px;
-      width: 90%; max-width: 320px; text-align: center;
-    }
-    .modal h3 { margin-bottom: 16px; font-size: 17px; }
-    .modal .grade-btns { margin-bottom: 16px; }
-    .modal-close {
-      background: none; border: 1px solid rgba(255,255,255,0.15);
-      color: #fff; padding: 10px 24px;
-      border-radius: 8px; cursor: pointer; font-size: 14px;
-    }
-  #landing {
-  position: fixed; inset: 0; z-index: 900;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden; transition: opacity 1s ease;
-}
-#landing.hide { opacity: 0; pointer-events: none; }
-.landing-bg { position: absolute; inset: -20%; z-index: 0; }
-.landing-bg img {
-  width: 100%; height: 140%;
-  object-fit: cover; will-change: transform;
-}
-.landing-overlay {
-  position: absolute; inset: 0;
-  background: rgba(10,15,30,0.6);
-}
-.landing-content {
-  position: relative; z-index: 2;
-  text-align: center; padding: 24px;
-}
-.landing-eyebrow {
-  font-size: 11px; letter-spacing: 0.3em;
-  color: #94a3b8; text-transform: uppercase;
-  margin-bottom: 20px;
-  animation: fadeUp 1s ease 0.5s both;
-}
-.landing-title {
-  font-size: 48px; font-weight: 800;
-  line-height: 1.1; color: #fff;
-  margin-bottom: 16px;
-  animation: fadeUp 1s ease 0.8s both;
-}
-.landing-sub {
-  font-size: 15px; color: #94a3b8;
-  margin-bottom: 36px;
-  animation: fadeUp 1s ease 1.1s both;
-}
-.landing-btn {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  color: #fff; padding: 14px 32px;
-  border-radius: 30px; font-size: 15px;
-  cursor: pointer; letter-spacing: 0.05em;
-  animation: fadeUp 1s ease 1.4s both;
-  transition: background 0.2s, border-color 0.2s;
-}
-.landing-btn:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.6);
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>
-</head>
-<body>
-
-<!-- LANDING -->
-<div id="landing">
-  <div class="landing-bg">
-    <img id="landingImg" src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1600&q=80" alt="bg" />
-    <div class="landing-overlay"></div>
-  </div>
-  <div class="landing-content">
-    <p class="landing-eyebrow">Your CAPS Study Companion</p>
-    <h1 class="landing-title">WELCOME TO<br>STUDY NEXUS</h1>
-    <p class="landing-sub">Learn smarter. Study better. Go further.</p>
-    <button class="landing-btn" onclick="enterLanding()">Get Started →</button>
-  </div>
-</div>
-
-<!-- GRADE 8 PAGE -->
-<div id="grade8">
-  <div class="topbar">
-    <h1>Study Nexus</h1>
-    <button class="grade-switcher" onclick="openModal()">Grade 8 ▾</button>
-  </div>
-
-  <!-- MATHEMATICS -->
-  <div class="subject-section">
-    <div class="subject-hero">
-      <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1600&q=80" alt="Mathematics" />
-      <div class="overlay"></div>
-      <h2>Mathematics</h2>
-    </div>
-    <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span>Term 1</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Whole numbers</span><span class="pill">Integers</span><span class="pill">Exponents</span><span class="pill">Numeric & geometric patterns</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header active" onclick="toggleTerm(this)">
-          <span>Term 2 — Current</span><span class="icon">−</span>
-        </div>
-        <div class="term-body open">
-          <span class="pill">Functions & relationships</span><span class="pill">Algebraic expressions</span><span class="pill">Algebraic equations</span><span class="pill">Graphs</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span>Term 3</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Geometry of 2D shapes</span><span class="pill">Geometry of straight lines</span><span class="pill">Pythagoras</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)">
-          <span>Term 4</span><span class="icon">+</span>
-        </div>
-        <div class="term-body">
-          <span class="pill">Area & perimeter</span><span class="pill">Surface area & volume</span><span class="pill">Data handling</span><span class="pill">Probability</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AFRIKAANS -->
-  <div class="subject-section">
-    <div class="subject-hero">
-      <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80" alt="Afrikaans" />
-      <div class="overlay"></div>
-      <h2>Afrikaans EAT</h2>
-    </div>
-    <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 1</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Leesbegrip</span><span class="pill">Kort stories</span><span class="pill">Taalstrukture & woordeskat</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header active" onclick="toggleTerm(this)"><span>Term 2 — Current</span><span class="icon">−</span></div>
-        <div class="term-body open"><span class="pill">Formele brief</span><span class="pill">Advertensie</span><span class="pill">Begrip & visuele tekste</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 3</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Drama teks</span><span class="pill">Opstel skryf</span><span class="pill">Visuele geletterdheid</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 4</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Gedigte</span><span class="pill">Hersiening</span><span class="pill">Eksamenvoorbereiding</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ENGLISH -->
-  <div class="subject-section">
-    <div class="subject-hero">
-      <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=1600&q=80" alt="English" />
-      <div class="overlay"></div>
-      <h2>English HL</h2>
-    </div>
-    <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 1</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Short stories</span><span class="pill">Transactional writing</span><span class="pill">Language structures</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header active" onclick="toggleTerm(this)"><span>Term 2 — Current</span><span class="icon">−</span></div>
-        <div class="term-body open"><span class="pill">Novel study</span><span class="pill">Formal letter</span><span class="pill">Comprehension</span><span class="pill">Visual literacy</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 3</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Drama</span><span class="pill">Persuasive essay</span><span class="pill">Vocabulary & grammar</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 4</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Poetry</span><span class="pill">Report writing</span><span class="pill">Exam revision</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- NATURAL SCIENCES -->
-  <div class="subject-section">
-    <div class="subject-hero">
-      <img src="https://images.unsplash.com/photo-1628595351029-c2bf17511435?w=1600&q=80" alt="Natural Sciences" />
-      <div class="overlay"></div>
-      <h2>Natural Sciences</h2>
-    </div>
-    <div class="topics">
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 1</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Atoms & molecules</span><span class="pill">Elements & compounds</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header active" onclick="toggleTerm(this)"><span>Term 2 — Current</span><span class="icon">−</span></div>
-        <div class="term-body open"><span class="pill">Cells & tissues</span><span class="pill">Organs & systems</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 3</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Energy & electricity</span><span class="pill">Magnetism</span></div>
-      </div>
-      <div class="term">
-        <div class="term-header" onclick="toggleTerm(this)"><span>Term 4</span><span class="icon">+</span></div>
-        <div class="term-body"><span class="pill">Tectonic activity</span><span class="pill">Water cycle</span><span class="pill">Revision</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- GRADE MODAL -->
-<div class="modal-overlay" id="gradeModal">
-  <div class="modal">
-    <h3>Switch Grade</h3>
-    <div class="grade-btns">
-      <button onclick="switchGrade(8)">8</button>
-      <button onclick="switchGrade(9)">9</button>
-      <button onclick="switchGrade(10)">10</button>
-      <button onclick="switchGrade(11)">11</button>
-      <button onclick="switchGrade(12)">12</button>
-    </div>
-    <button class="modal-close" onclick="closeModal()">Cancel</button>
-  </div>
-</div>
-
-<script>
-  let selectedGrade = 11;
-
-  function selectGrade(grade, btn) {
+  /* ---- Grade selection ---- */
+  function pickGrade(grade, card) {
     selectedGrade = grade;
-    document.querySelectorAll('.grade-btns button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    document.querySelectorAll('.grade-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    document.getElementById('gradeCta').classList.add('ready');
   }
 
-  function goToGrade() {
+  /* ---- Enter app ---- */
+  function enterApp() {
+    if (!selectedGrade) return;
     localStorage.setItem('studynexus_grade', selectedGrade);
-    if (selectedGrade === 8) {
+    document.getElementById('gradeLabel').textContent = 'Grade ' + selectedGrade + ' ▾';
+    document.getElementById('landing').style.opacity = '0';
+    document.getElementById('landing').style.transition = 'opacity 0.6s ease';
+    setTimeout(() => {
       document.getElementById('landing').style.display = 'none';
-      document.getElementById('grade8').style.display = 'block';
-    } else {
-      alert('Grade ' + selectedGrade + ' coming soon!');
-    }
+      document.getElementById('app').style.display = 'block';
+      window.scrollTo(0, 0);
+    }, 600);
   }
 
+  /* ---- Term toggle ---- */
   function toggleTerm(header) {
     const body = header.nextElementSibling;
     const icon = header.querySelector('.icon');
@@ -803,58 +754,28 @@
     icon.textContent = body.classList.contains('open') ? '−' : '+';
   }
 
-  function openModal() {
-    document.getElementById('gradeModal').classList.add('open');
-  }
-
-  function closeModal() {
-    document.getElementById('gradeModal').classList.remove('open');
-  }
-
-  function switchGrade(grade) {
-    localStorage.setItem('studynexus_grade', grade);
-    closeModal();
-    if (grade === 8) {
-      document.getElementById('landing').style.display = 'none';
-      document.getElementById('grade8').style.display = 'block';
-    } else {
-      alert('Grade ' + grade + ' coming soon!');
-    }
-  }
-
-  // Auto-load if grade saved
+  /* ---- Auto-load saved grade ---- */
   const saved = localStorage.getItem('studynexus_grade');
-  if (saved === '8') {
+  if (saved) {
     document.getElementById('landing').style.display = 'none';
-    document.getElementById('grade8').style.display = 'block';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('gradeLabel').textContent = 'Grade ' + saved + ' ▾';
   }
-window.addEventListener('scroll', () => {
-  document.querySelectorAll('.subject-hero img').forEach(img => {
-    const rect = img.closest('.subject-hero').getBoundingClientRect();
-    const offset = (rect.top / window.innerHeight) * 40;
-    img.style.transform = `translateY(${offset}px)`;
-  });
-});
-  function enterLanding() {
-  document.getElementById('landing').classList.add('hide');
-  setTimeout(() => {
-    document.getElementById('landing').style.display = 'none';
-    const saved = localStorage.getItem('studynexus_grade');
-    if (saved) {
-      document.getElementById('gradeLabel').textContent = 'Grade ' + saved + ' ▾';
-    } else {
-      document.getElementById('gradeOverlay').classList.add('show');
-    }
-  }, 1000);
-}
 
-window.addEventListener('mousemove', (e) => {
-  const img = document.getElementById('landingImg');
-  if (!img) return;
-  const x = (e.clientX / window.innerWidth - 0.5) * 20;
-  const y = (e.clientY / window.innerHeight - 0.5) * 20;
-  img.style.transform = `translate(${x}px, ${y}px)`;
-});
-</script>
+  /* Initial reveal check */
+  setTimeout(() => {
+    document.querySelectorAll('.reveal').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.88) el.classList.add('visible');
+    });
+      }, 100);
+     function goHome() {
+    localStorage.removeItem('studynexus_grade');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('landing').style.display = 'block';
+    document.getElementById('landing').style.opacity = '1';
+    window.scrollTo(0, 0);
+      }
+    </script>
 </body>
 </html>
